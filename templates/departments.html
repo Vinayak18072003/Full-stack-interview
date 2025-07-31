@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Departments</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Departments</h1>
+    <ul id="department-list"></ul>
+    <p>
+        <a href="/">← View All Products</a>
+    </p>
+
+    <script>
+        fetch('/departments')
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById("department-list");
+                list.innerHTML = '';
+                data.forEach(dept => {
+                    const item = document.createElement("li");
+                    item.innerHTML = `<a href="/department/${dept.id}">${dept.name}</a>`;
+                    list.appendChild(item);
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching departments:", error);
+            });
+    </script>
+</body>
+</html>

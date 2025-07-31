@@ -8,16 +8,38 @@
     <h1>Product List</h1>
     <ul id="product-list"></ul>
 
+    <p>
+        <a href="/departments-list">View by Department</a>
+    </p>
+
     <script>
+        const url = window.location.pathname;
+        let departmentId = null;
+
+        if (url.startsWith("/department/")) {
+            departmentId = parseInt(url.split("/").pop());
+        }
+
         fetch('/products')
             .then(res => res.json())
             .then(data => {
                 const list = document.getElementById("product-list");
+                list.innerHTML = '';
+
                 data.forEach(product => {
-                    const item = document.createElement("li");
-                    item.innerHTML = `<a href="/product/${product.id}">${product.name} - ₹${product.price}</a>`;
-                    list.appendChild(item);
+                    if (!departmentId || product.department_id === departmentId) {
+                        const item = document.createElement("li");
+                        item.innerHTML = `<a href="/product/${product.id}">${product.name} - ₹${product.price}</a>`;
+                        list.appendChild(item);
+                    }
                 });
+
+                if (departmentId && list.children.length === 0) {
+                    list.innerHTML = "<li>No products found in this department.</li>";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching products:", error);
             });
     </script>
 </body>
