@@ -28,3 +28,13 @@ def get_product(product_id):
         "price": float(p.price),
         "department": p.department.name
     })
+
+from flask import render_template
+
+@api.route("/")
+def index_page():
+    return render_template("index.html")
+
+@api.route("/product/<int:product_id>")
+def product_page(product_id):
+    return render_template("product.html")
