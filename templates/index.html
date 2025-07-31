@@ -1,46 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>All Products</title>
+    <title>Product List</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <h1>Product List</h1>
+
+    <label for="department-select">Filter by Department:</label>
+    <select id="department-select">
+        <option value="all">All</option>
+    </select>
+
     <ul id="product-list"></ul>
 
     <p>
-        <a href="/departments-list">View by Department</a>
+        <a href="/departments-list">View Department Links</a>
     </p>
 
     <script>
-        const url = window.location.pathname;
-        let departmentId = null;
+        const productList = document.getElementById("product-list");
+        const departmentSelect = document.getElementById("department-select");
 
-        if (url.startsWith("/department/")) {
-            departmentId = parseInt(url.split("/").pop());
-        }
+        let allProducts = [];
 
+        // Load departments into dropdown
+        fetch('/departments')
+            .then(res => res.json())
+            .then(departments => {
+                departments.forEach(dept => {
+                    const option = document.createElement("option");
+                    option.value = dept.id;
+                    option.textContent = dept.name;
+                    departmentSelect.appendChild(option);
+                });
+            });
+
+        // Load all products
         fetch('/products')
             .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("product-list");
-                list.innerHTML = '';
-
-                data.forEach(product => {
-                    if (!departmentId || product.department_id === departmentId) {
-                        const item = document.createElement("li");
-                        item.innerHTML = `<a href="/product/${product.id}">${product.name} - ₹${product.price}</a>`;
-                        list.appendChild(item);
-                    }
-                });
-
-                if (departmentId && list.children.length === 0) {
-                    list.innerHTML = "<li>No products found in this department.</li>";
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching products:", error);
+            .then(products => {
+                allProducts = products;
+                renderProducts("all");
             });
+
+        // Event listener for dropdown change
+        departmentSelect.addEventListener("change", () => {
+            const selected = departmentSelect.value;
+            renderProducts(selected);
+        });
+
+        // Render function
+        function renderProducts(deptId) {
+            productList.innerHTML = "";
+
+            const filtered = deptId === "all"
+                ? allProducts
+                : allProducts.filter(p => p.department_id == deptId);
+
+            if (filtered.length === 0) {
+                productList.innerHTML = "<li>No products in this department.</li>";
+                return;
+            }
+
+            filtered.forEach(product => {
+                const item = document.createElement("li");
+                item.innerHTML = `<a href="/product/${product.id}">${product.name} - ₹${product.price}</a>`;
+                productList.appendChild(item);
+            });
+        }
     </script>
 </body>
 </html>
