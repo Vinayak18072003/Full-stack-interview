@@ -7,13 +7,24 @@
 <body>
     <h1>Product List</h1>
 
+    <!-- Department Filter -->
     <label for="department-select">Filter by Department:</label>
     <select id="department-select">
         <option value="all">All</option>
     </select>
 
+    <!-- Sort Filter -->
+    <label for="sort-select">Sort by:</label>
+    <select id="sort-select">
+        <option value="none">None</option>
+        <option value="low">Price: Low to High</option>
+        <option value="high">Price: High to Low</option>
+    </select>
+
+    <!-- Product List -->
     <ul id="product-list"></ul>
 
+    <!-- Department List Link -->
     <p>
         <a href="/departments-list">View Department Links</a>
     </p>
@@ -21,6 +32,7 @@
     <script>
         const productList = document.getElementById("product-list");
         const departmentSelect = document.getElementById("department-select");
+        const sortSelect = document.getElementById("sort-select");
 
         let allProducts = [];
 
@@ -44,19 +56,29 @@
                 renderProducts("all");
             });
 
-        // Event listener for dropdown change
+        // Event listeners
         departmentSelect.addEventListener("change", () => {
-            const selected = departmentSelect.value;
-            renderProducts(selected);
+            renderProducts(departmentSelect.value);
         });
 
-        // Render function
+        sortSelect.addEventListener("change", () => {
+            renderProducts(departmentSelect.value);
+        });
+
+        // Render filtered and sorted products
         function renderProducts(deptId) {
             productList.innerHTML = "";
 
-            const filtered = deptId === "all"
-                ? allProducts
+            let filtered = deptId === "all"
+                ? [...allProducts]
                 : allProducts.filter(p => p.department_id == deptId);
+
+            const sortValue = sortSelect.value;
+            if (sortValue === "low") {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortValue === "high") {
+                filtered.sort((a, b) => b.price - a.price);
+            }
 
             if (filtered.length === 0) {
                 productList.innerHTML = "<li>No products in this department.</li>";
